@@ -12,8 +12,8 @@ class neuralnetwork:
         self.hidden_nodes = hidden_nodes
         self.output_nodes = output_nodes
 
-        self.input_weights = np.random.rand(self.hidden_nodes, self.input_nodes) - 0.5
-        self.hidden_weights = np.random.rand(self.output_nodes, self.hidden_nodes) - 0.5 # 1 by 3
+        self.input_weights = np.random.randn(self.hidden_nodes, self.input_nodes) * np.sqrt(2.0/self.input_nodes)
+        self.hidden_weights = np.random.randn(self.output_nodes, self.hidden_nodes) * np.sqrt(2.0/self.hidden_nodes) # 1 by 3
         self.binary_loss = None
 
 
@@ -31,6 +31,11 @@ class neuralnetwork:
         return 1 / (1 + np.exp(-z))
     
 
+    def LeakyReLU(self,z):
+        return np.maximum(0.01 * z, z)
+
+    
+
     def backprop(self, inputs_list, targets_list):
 
         outputs = self.feed_forward(inputs_list)
@@ -40,7 +45,10 @@ class neuralnetwork:
         self.dz2 = output_error * sig_error # 1 by 1
         self.dw2 = np.dot(self.dz2, self.a1.T) #1 by 1 by 1 by 3
         da = np.dot(self.hidden_weights.T, self.dz2)
+        # make self.a1 into Relu function
+        #lrelud = np.where(self.z1 > 0, 1, 0.2)
         dz1 = da * self.a1 * (1-self.a1)
+        #dz1 = da * lrelud
         self.dw1 = np.dot(dz1, inputs_list.T)
 
     def train(self, inputs_list, targets_list, epochs=100):
